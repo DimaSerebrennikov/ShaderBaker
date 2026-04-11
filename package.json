@@ -1,0 +1,10 @@
+{
+  "name": "com.serebrennikov.shaderbaker",
+  "version": "1.0.0",
+  "displayName": "Shader Baker",
+  "description": "A tool for baking shaders in Unity.",
+  "unity": "6000.3",
+  "author": {
+    "name": "Serebrennikov"
+  }
+}
