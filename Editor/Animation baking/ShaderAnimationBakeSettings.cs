@@ -1,6 +1,5 @@
 ﻿#if UNITY_EDITOR
 using System;
-using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 namespace Serebrennikov {
@@ -37,6 +36,18 @@ namespace Serebrennikov {
                 }
                 OutputFolderPath = Path.Combine(directory, fileNameWithoutExtension).Replace('\\', '/');
             }
+        }
+        public ShaderBakeSettings CreateFrameBakeSettings(string outputPath) {
+            return new ShaderBakeSettings {
+                Material = Material,
+                Width = Width,
+                Height = Height,
+                OutputPath = outputPath,
+                OverwriteExisting = OverwriteExisting,
+                SelectCreatedAsset = SelectCreatedAsset,
+                FilterMode = FilterMode,
+                WrapMode = WrapMode
+            };
         }
     }
 }

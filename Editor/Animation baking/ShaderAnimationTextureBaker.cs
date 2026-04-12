@@ -8,6 +8,10 @@ namespace Serebrennikov {
     public sealed class ShaderAnimationTextureBaker {
         const string BakeTimePropertyName = "_BakeTime";
         const string DurationPropertyName = "_Duration";
+        readonly ShaderTextureBaker shaderTextureBaker;
+        public ShaderAnimationTextureBaker(ShaderTextureBaker shaderTextureBaker) {
+            this.shaderTextureBaker = shaderTextureBaker ?? throw new ArgumentNullException(nameof(shaderTextureBaker));
+        }
         public ShaderAnimationBakeResult Bake(ShaderAnimationBakeSettings settings) {
             if (settings == null) {
                 return ShaderAnimationBakeResult.Failed("Animation settings are null.");
@@ -49,10 +53,8 @@ namespace Serebrennikov {
                     settings.Material.SetFloat(BakeTimePropertyName, bakeTime);
                     string fileName = $"{filePrefix}_{frameIndex:D4}.png";
                     string outputPath = Path.Combine(outputFolderPath, fileName).Replace('\\', '/');
-                    if (File.Exists(outputPath) && !settings.OverwriteExisting) {
-                        return ShaderAnimationBakeResult.Failed($"Target file already exists and overwrite is disabled: {outputPath}");
-                    }
-                    ShaderBakeResult frameResult = BakeFrame(settings, outputPath, fileName);
+                    ShaderBakeSettings frameSettings = settings.CreateFrameBakeSettings(outputPath);
+                    ShaderBakeResult frameResult = shaderTextureBaker.Bake(frameSettings);
                     if (!frameResult.Success) {
                         return ShaderAnimationBakeResult.Failed(frameResult.ErrorMessage);
                     }
@@ -68,57 +70,6 @@ namespace Serebrennikov {
             }
             finally {
                 settings.Material.SetFloat(BakeTimePropertyName, previousBakeTime);
-            }
-        }
-        static ShaderBakeResult BakeFrame(ShaderAnimationBakeSettings settings, string outputPath, string textureName) {
-            RenderTexture previousActive = RenderTexture.active;
-            RenderTexture renderTexture = null;
-            Texture2D bakedTexture = null;
-            try {
-                renderTexture = new RenderTexture(settings.Width, settings.Height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
-                renderTexture.name = "Shader animation bake render texture";
-                renderTexture.filterMode = settings.FilterMode;
-                renderTexture.wrapMode = settings.WrapMode;
-                renderTexture.Create();
-                Graphics.Blit(Texture2D.whiteTexture, renderTexture, settings.Material, 0);
-                RenderTexture.active = renderTexture;
-                bakedTexture = new Texture2D(settings.Width, settings.Height, TextureFormat.RGBA32, false, false);
-                bakedTexture.name = Path.GetFileNameWithoutExtension(textureName);
-                bakedTexture.filterMode = settings.FilterMode;
-                bakedTexture.wrapMode = settings.WrapMode;
-                bakedTexture.ReadPixels(new Rect(0.0f, 0.0f, settings.Width, settings.Height), 0, 0, false);
-                bakedTexture.Apply(false, false);
-                byte[] pngData = bakedTexture.EncodeToPNG();
-                File.WriteAllBytes(outputPath, pngData);
-                AssetDatabase.ImportAsset(outputPath, ImportAssetOptions.ForceUpdate);
-                TextureImporter importer = AssetImporter.GetAtPath(outputPath) as TextureImporter;
-                if (importer != null) {
-                    importer.textureType = TextureImporterType.Default;
-                    importer.alphaSource = TextureImporterAlphaSource.FromInput;
-                    importer.alphaIsTransparency = true;
-                    importer.sRGBTexture = true;
-                    importer.mipmapEnabled = false;
-                    importer.isReadable = false;
-                    importer.wrapMode = settings.WrapMode;
-                    importer.filterMode = settings.FilterMode;
-                    importer.textureCompression = TextureImporterCompression.Uncompressed;
-                    importer.SaveAndReimport();
-                }
-                Texture2D createdAsset = AssetDatabase.LoadAssetAtPath<Texture2D>(outputPath);
-                return ShaderBakeResult.Completed(outputPath, createdAsset);
-            }
-            catch (Exception exception) {
-                return ShaderBakeResult.Failed(exception.Message);
-            }
-            finally {
-                RenderTexture.active = previousActive;
-                if (renderTexture != null) {
-                    renderTexture.Release();
-                    UnityEngine.Object.DestroyImmediate(renderTexture);
-                }
-                if (bakedTexture != null) {
-                    UnityEngine.Object.DestroyImmediate(bakedTexture);
-                }
             }
         }
     }

@@ -1,6 +1,5 @@
 ﻿#if UNITY_EDITOR
 using System;
-using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -44,7 +43,7 @@ namespace Serebrennikov {
             animationSettings = new ShaderAnimationBakeSettings();
             animationSettings.CopySharedValuesFrom(settings);
             animationValidator = new ShaderAnimationBakeValidator();
-            animationBaker = new ShaderAnimationTextureBaker();
+            animationBaker = new ShaderAnimationTextureBaker(baker);
             textureListMergeModule = new TextureListMergeModule();
             VisualElement root = rootVisualElement;
             root.Clear();

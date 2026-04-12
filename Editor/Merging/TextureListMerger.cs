@@ -45,7 +45,6 @@ namespace Serebrennikov {
                 return TextureListMergeResult.Failed(exception.Message);
             }
         }
-
         static Texture2D CreateMergedTexture(TextureListMergeSettings settings, int textureIndex) {
             Texture2D firstTexture = settings.Layers[0].Textures[textureIndex];
             int width = firstTexture.width;
@@ -67,7 +66,6 @@ namespace Serebrennikov {
             mergedTexture.Apply(false, false);
             return mergedTexture;
         }
-
         static Color[] ReadTexturePixels(Texture texture) {
             RenderTexture previousActive = RenderTexture.active;
             RenderTexture renderTexture = null;
@@ -91,7 +89,6 @@ namespace Serebrennikov {
                 }
             }
         }
-
         static Color AlphaBlend(Color destination, Color source) {
             float outputAlpha = source.a + destination.a * (1.0f - source.a);
             if (outputAlpha <= 0.0f) {
@@ -104,7 +101,6 @@ namespace Serebrennikov {
             output.a = outputAlpha;
             return output;
         }
-
         static void WriteTextureAsset(TextureListMergeSettings settings, Texture2D texture, string outputPath) {
             byte[] pngData = texture.EncodeToPNG();
             File.WriteAllBytes(outputPath, pngData);

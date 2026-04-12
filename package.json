@@ -4,6 +4,7 @@
   "displayName": "Shader Baker",
   "description": "A tool for baking shaders in Unity.",
   "unity": "6000.3",
+  "documentationUrl": "https://docs.google.com/document/d/1PtlFA_Nz4IO8G0LTQM25rbkS8vUU1NJ_5vLJ3-aRYTQ/edit?usp=sharing",
   "author": {
     "name": "Serebrennikov"
   }
